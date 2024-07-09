@@ -1,0 +1,519 @@
+% examples.tex
+
+
+
+%\subsection{}
+%\begin{verbatim}
+
+%\end{verbatim}
+%{\bf \foetus\ output:}\nopagebreak
+%\begin{verbatim}
+
+%\end{verbatim}
+%\runexample{}
+
+\subsection{Addition and multiplication\label{ex:add}}
+On the natural numbers
+$$
+    \nat := \Let{\nat = \{ \mathtt{O()}|\mathtt{S(}\nat\mathtt{)} \}}{\nat}
+$$
+we define $\mathtt{add},\mathtt{mult} : \nat \rightarrow \nat \rightarrow \nat$:
+%\begin{eqnarray}
+%    \mathtt{add}  & : & \nat \rightarrow \nat \nonumber \\
+%    \mathtt{mult} & : & \nat \rightarrow \nat \nonumber
+%\end{eqnarray}
+\begin{verbatim}
+add = [x][y]case x of
+        { O z => y
+        | S x' => S(add x' y) };
+mult = [x][y]case x of
+        { O z => O z
+        | S x' => (add y (mult x' y)) };
+add (S(S(O()))) (S(O()));
+mult (S(S(O()))) (S(S(S(O()))));
+\end{verbatim}
+{\bf\foetus\ output:}\nopagebreak[4]
+\begin{verbatim}
+< =: add -> add
+add passes termination check by lexical order 0
+< =: mult -> mult
+mult passes termination check by lexical order 0
+result: S(S(S(O())))
+result: S(S(S(S(S(S(O()))))))
+\end{verbatim}
+\runexample{add+\%3D+\%5Bx\%5D\%5By\%5Dcase+x+of+\%0D\%0A\%09\%7B+O+z+\%3D\%3E+y\%0D\%0A\%09\%7C+S+x\%27+\%3D\%3E+S\%28add+x\%27+y\%29+\%7D\%3B\%0D\%0Amult+\%3D+\%5Bx\%5D\%5By\%5Dcase+x+of\%0D\%0A\%09\%7B+O+z+\%3D\%3E+O+z\%0D\%0A\%09\%7C+S+x\%27+\%3D\%3E+\%28add+y+\%28mult+x\%27+y\%29\%29+\%7D\%3B\%0D\%0Aadd+\%28S\%28S\%28O\%28\%29\%29\%29\%29+\%28S\%28O\%28\%29\%29\%29\%3B\%0D\%0Amult+\%28S\%28S\%28O\%28\%29\%29\%29\%29+\%28S\%28S\%28S\%28O\%28\%29\%29\%29\%29\%29\%3B\%0D\%0A}
+
+\subsection{Subtraction\label{ex:sub}}
+We define the predecessor function $\mathtt{p} : \nat \rightarrow
+\nat$ and substraction on natural
+numbers $\mathtt{sub} : \nat \rightarrow \nat \rightarrow \nat$. Note {\tt sub} $x$ $y$
+calculates $y \stackrel{\cdot}{-} x$.
+\begin{verbatim}
+p = [x]case x of { O z => O z | S x' => x' };
+sub = [x][y]case x of
+        { O z => y
+        | S x' => sub x' (p y) };
+sub (S(S(O()))) (S(S(S(S(O())))));
+\end{verbatim}
+{\bf \foetus\ output:}\nopagebreak
+\begin{verbatim}
+p passes termination check
+< ?: sub -> sub
+sub passes termination check by lexical order 0
+result: S(S(O()))
+\end{verbatim}
+\runexample{p+\%3D+\%5Bx\%5Dcase+x+of+\%7B+O+z+\%3D\%3E+O+z+\%7C+S+x\%27+\%3D\%3E+x\%27+\%7D\%3B\%0D\%0Asub+\%3D+\%5Bx\%5D\%5By\%5Dcase+x+of\%0D\%0A\%09\%7B+O+z+\%3D\%3E+y\%0D\%0A\%09\%7C+S+x\%27+\%3D\%3E+sub+x\%27+\%28p+y\%29+\%7D\%3B\%0D\%0Asub+\%28S\%28S\%28O\%28\%29\%29\%29\%29+\%28S\%28S\%28S\%28S\%28O\%28\%29\%29\%29\%29\%29\%29\%3B\%0D\%0A}
+
+\subsection{Division\label{ex:div}}
+Division
+$\mathtt{div} : \nat \rightarrow \nat \rightarrow \nat$
+%$\mathtt{div} : \nat \rightarrow \mathtt{S(}\nat\mathtt{)}
+%\rightarrow \nat$
+can be implemented as follows in functional languages (note
+that {\tt div x y} calculates $\lfloor \frac{y}{x} \rfloor$):
+\begin{verbatim}
+div (x,y) = div'(x,y+1-x)
+div'(x,y) = if (y=0) then 0 else div'(x,y-x)
+\end{verbatim}
+{\tt div'} (just like division on natural numbers) terminates if the
+divisor {\tt x} is unequal 0 because then {\tt y-x} $<$ {\tt y} in the
+recursive call and thus one function argument is decreasing. But
+\foetus\ recognizes only direct structural decrease and cannot see
+that {\tt sub x y'} is less than {\tt y'}. To prove termination of
+{\tt div'} you need a proof for $x \not= 0 \rightarrow \mathtt{sub}\, x \,y
+< y$ \cite{BG96}.
+\begin{verbatim}
+p = [x]case x of { O z => O z | S x' => x' };
+sub = [x][y]case x of
+        { O z => y
+        | S x' => sub x' (p y) };
+div = [x][y]let
+        div' = [y']case y' of
+                { O z => O z
+                | S dummy => S(div' (sub x y')) }
+        in
+        (div' (sub (p x) y));
+div (S(S(O()))) (S(S(S(S(S(O()))))));
+\end{verbatim}
+{\bf\foetus\ output:}\nopagebreak
+\begin{verbatim}
+p passes termination check
+< ?: sub -> sub
+sub passes termination check by lexical order 0
+div passes termination check
+?: div' -> div'
+div' FAILS termination check
+result: S(S(O()))
+\end{verbatim}
+Here \foetus\ says {\tt div'} fails termination check, so {\tt div}
+will not terminate either. {\tt div} would terminate, if {\tt div'}
+terminated, therefore you get the answer {\tt div passes termination check}.
+\runexample{p+\%3D+\%5Bx\%5Dcase+x+of+\%7B+O+z+\%3D\%3E+O+z+\%7C+S+x\%27+\%3D\%3E+x\%27+\%7D\%3B\%0D\%0Asub+\%3D+\%5Bx\%5D\%5By\%5Dcase+x+of\%0D\%0A\%09\%7B+O+z+\%3D\%3E+y\%0D\%0A\%09\%7C+S+x\%27+\%3D\%3E+sub+x\%27+\%28p+y\%29+\%7D\%3B\%0D\%0Adiv+\%3D+\%5Bx\%5D\%5By\%5Dlet+\%0D\%0A\%09div\%27+\%3D+\%5By\%27\%5Dcase+y\%27+of\%0D\%0A\%09\%09\%7B+O+z+\%3D\%3E+O+z\%0D\%0A\%09\%09\%7C+S+dummy+\%3D\%3E+S\%28div\%27+\%28sub+x+y\%27\%29\%29+\%7D\%0D\%0A\%09in\%0D\%0A\%09\%28div\%27+\%28sub+\%28p+x\%29+y\%29\%29\%3B\%0D\%0Adiv+\%28S\%28S\%28O\%28\%29\%29\%29\%29+\%28S\%28S\%28S\%28S\%28S\%28O\%28\%29\%29\%29\%29\%29\%29\%29\%3B\%0D\%0A}
+
+\subsection{Ackermann function\label{ex:ack}}
+The not primitive recursive Ackermann function
+$\mathtt{ack} : \nat \rightarrow \nat \rightarrow \nat$.
+\begin{verbatim}
+ack = [x][y]case x of
+        { O z  => S(y)
+        | S x' => ack x' (case y of
+                { O z  => S(O())
+                | S y' => ack x y'} ) };
+ack (S(S(O()))) (O());
+\end{verbatim}
+{\bf\foetus\ output:}\nopagebreak
+\begin{verbatim}
+foetus $Revision: 1.0 $
+= <: ack -> ack
+< ?: ack -> ack
+ack passes termination check by lexical order 0 1
+result: S(S(S(O())))
+\end{verbatim}
+\runexample{ack+\%3D+\%5Bx\%5D\%5By\%5Dcase+x+of\%0D\%0A\%09\%7B+O+z++\%3D\%3E+S\%28y\%29\%0D\%0A\%09\%7C+S+x\%27+\%3D\%3E+ack+x\%27+\%28case+y+of\%0D\%0A\%09\%09\%7B+O+z++\%3D\%3E+S\%28O\%28\%29\%29\%0D\%0A\%09\%09\%7C+S+y\%27+\%3D\%3E+ack+x+y\%27\%7D+\%29+\%7D\%3B\%0D\%0Aack+\%28S\%28S\%28O\%28\%29\%29\%29\%29+\%28O\%28\%29\%29\%3B\%0D\%0A}
+
+\subsection{List processing\label{ex:list}}
+We define lists over type $\alpha$ as
+$$
+    \alist := \Pitype{\alpha}\Let{ \alist = \{
+      \mathtt{Nil()} | \mathtt{Cons(HD}:\alpha \mathtt{, TL}:\alist
+      \mathtt{)} \} }{\alist}
+$$
+The well-known list processing functions $\mathtt{map} :  (\alpha
+\rightarrow \beta) \rightarrow \alist \alpha \rightarrow \alist \beta$
+and $\mathtt{foldl} : (\alpha \rightarrow \beta \rightarrow \beta)
+\rightarrow \beta \rightarrow \alist \alpha \rightarrow \beta$ are
+implemented and testet.
+\begin{verbatim}
+nil = Nil();
+cons = [hd][tl]Cons(HD=hd,TL=tl);
+l1 = cons (A()) (cons (B()) (cons (C()) nil));
+
+map = [f][list]let
+        map' = [l]case l of
+                { Nil z => Nil()
+                | Cons pair => Cons (HD=(f pair.HD),
+                                     TL=(map' pair.TL))}
+        in map' list;
+map ([el]F(el)) l1;
+
+foldl = [f][e][list]let
+        foldl' = [e][l]case l of
+                { Nil z => e
+                | Cons p => foldl' (f p.HD e) p.TL }
+        in foldl' e list;
+
+rev = [list]foldl cons nil list;
+rev l1;
+\end{verbatim}
+{\bf\foetus\ output:}\nopagebreak
+\begin{verbatim}
+nil passes termination check
+cons passes termination check
+l1 passes termination check
+
+map passes termination check
+<: map' -> map'
+map' passes termination check by lexical order 0
+result: Cons(HD=F(A()), TL=Cons(HD=F(B()), TL=Cons(HD=F(C()),
+        TL=Nil())))
+
+foldl passes termination check
+? <: foldl' -> foldl'
+foldl' passes termination check by lexical order 1
+rev passes termination check
+result: Cons(HD=C(), TL=Cons(HD=B(), TL=Cons(HD=A(), TL=Nil())))
+\end{verbatim}
+\runexample{nil+\%3D+Nil\%28\%29\%3B\%0D\%0Acons+\%3D+\%5Bhd\%5D\%5Btl\%5DCons\%28HD\%3Dhd\%2CTL\%3Dtl\%29\%3B\%0D\%0Al1+\%3D+cons+\%28A\%28\%29\%29+\%28cons+\%28B\%28\%29\%29+\%28cons+\%28C\%28\%29\%29+nil\%29\%29\%3B\%0D\%0A\%0D\%0Amap+\%3D+\%5Bf\%5D\%5Blist\%5Dlet\%0D\%0A\%09map\%27+\%3D+\%5Bl\%5Dcase+l+of\%0D\%0A\%09\%09\%7B+Nil+z+\%3D\%3E+Nil\%28\%29\%0D\%0A\%09\%09\%7C+Cons+pair+\%3D\%3E+Cons+\%28HD\%3D\%28f+pair.HD\%29\%2C+TL\%3D\%28map\%27+pair.TL\%29\%29\%7D\%0D\%0A\%09in+map\%27+list\%3B\%0D\%0Amap+\%28\%5Bel\%5DF\%28el\%29\%29+l1\%3B\%0D\%0A\%0D\%0Afoldl+\%3D+\%5Bf\%5D\%5Be\%5D\%5Blist\%5Dlet\%0D\%0A\%09foldl\%27+\%3D+\%5Be\%5D\%5Bl\%5Dcase+l+of\%0D\%0A\%09\%09\%7B+Nil+z+\%3D\%3E+e\%0D\%0A\%09\%09\%7C+Cons+p+\%3D\%3E+foldl\%27+\%28f+p.HD+e\%29+p.TL+\%7D\%0D\%0A\%09in+foldl\%27+e+list\%3B\%0D\%0A\%0D\%0Arev+\%3D+\%5Blist\%5Dfoldl+cons+nil+list\%3B\%0D\%0Arev+l1\%3B\%0D\%0A}
+
+\subsection{List flattening\label{ex:flatten}}
+The task is to transform a list of lists into a list, so that the
+elements of the first list come first, then the elements of the second
+list and so on. Example: {\tt flatten [[A,B,C],[D,E,F]] = [A,B,C,D,E,F]}.
+The first version $\mathtt{flatten} : \alist(\alist \alpha)
+\rightarrow \alist \alpha$ works but fails termination check
+because of the limited pattern matching abilities of \foetus, but it is
+also bad style and inefficient because it builds a temporary list for
+the recursive call. However, the second version {\tt f} with a mutual
+recursive auxiliary function $\mathtt{g} : \alist \alpha \rightarrow
+\alist(\alist \alpha) \rightarrow \alist \alpha$ passes termination check.
+\begin{verbatim}
+nil = Nil();
+cons = [hd][tl]Cons(HD=hd,TL=tl);
+l1 = cons (A()) (cons (B()) (cons (C()) nil));
+ll = (cons l1 (cons l1 nil));
+
+flatten = [listlist]case listlist of
+        { Nil z => Nil()
+        | Cons p => case p.HD of
+                { Nil z => flatten p.TL
+                | Cons p' => Cons(HD=p'.HD, TL=flatten
+                                (Cons(HD=p'.TL, TL=p.TL))) }};
+flatten ll;
+
+f = [l]case l of
+        { Nil z => Nil()
+        | Cons p => g p.HD p.TL },
+g = [l][ls]case l of
+        { Nil z => f ls
+        | Cons p => Cons(HD=p.HD, TL=(g p.TL ls)) };
+f ll;
+\end{verbatim}
+{\bf \foetus\ output:}\nopagebreak
+\begin{verbatim}
+nil passes termination check
+cons passes termination check
+l1 passes termination check
+ll passes termination check
+
+?: flatten -> flatten
+<: flatten -> flatten
+flatten FAILS termination check
+result: Cons(HD=A(), TL=Cons(HD=B(), TL=Cons(HD=C(),
+TL=Cons(HD=A(), TL=Cons(HD=B(), TL=Cons(HD=C(), TL=Nil()))))))
+
+<: f -> g -> f
+f passes termination check by lexical order 0
+? <: g -> f -> g
+< =: g -> g
+g passes termination check by lexical order 1 0
+result: Cons(HD=A(), TL=Cons(HD=B(), TL=Cons(HD=C(),
+TL=Cons(HD=A(), TL=Cons(HD=B(), TL=Cons(HD=C(), TL=Nil()))))))
+\end{verbatim}
+\runexample{nil+\%3D+Nil\%28\%29\%3B\%0D\%0Acons+\%3D+\%5Bhd\%5D\%5Btl\%5DCons\%28HD\%3Dhd\%2CTL\%3Dtl\%29\%3B\%0D\%0Al1+\%3D+cons+\%28A\%28\%29\%29+\%28cons+\%28B\%28\%29\%29+\%28cons+\%28C\%28\%29\%29+nil\%29\%29\%3B\%0D\%0All+\%3D+\%28cons+l1+\%28cons+l1+nil\%29\%29\%3B\%0D\%0A\%0D\%0Aflatten+\%3D+\%5Blistlist\%5Dcase+listlist+of\%0D\%0A\%09\%7B+Nil+z+\%3D\%3E+Nil\%28\%29\%0D\%0A\%09\%7C+Cons+p+\%3D\%3E+case+p.HD+of\%0D\%0A\%09\%09\%7B+Nil+z+\%3D\%3E+flatten+p.TL\%0D\%0A\%09\%09\%7C+Cons+p\%27+\%3D\%3E+Cons\%28HD\%3Dp\%27.HD\%2C+TL\%3Dflatten+\%28Cons\%28HD\%3Dp\%27.TL\%2C+\%0D\%0A\%09\%09\%09\%09\%09\%09\%09TL\%3Dp.TL\%29\%29\%29+\%7D\%7D\%3B\%0D\%0Aflatten+ll\%3B\%0D\%0A\%0D\%0Af+\%3D+\%5Bl\%5Dcase+l+of\%0D\%0A\%09\%7B+Nil+z+\%3D\%3E+Nil\%28\%29+\%0D\%0A\%09\%7C+Cons+p+\%3D\%3E+g+p.HD+p.TL+\%7D\%2C\%0D\%0Ag+\%3D+\%5Bl\%5D\%5Bls\%5Dcase+l+of\%0D\%0A\%09\%7B+Nil+z+\%3D\%3E+f+ls\%0D\%0A\%09\%7C+Cons+p+\%3D\%3E+Cons\%28HD\%3Dp.HD\%2C+TL\%3D\%28g+p.TL+ls\%29\%29+\%7D\%3B\%0D\%0Af+ll\%3B\%0D\%0A}
+
+\subsection{Merge sort}
+With type
+$$
+    \bool := \{ \mathtt{True()} | \mathtt{False()} \}
+$$
+we can define {\tt le\_nat}$: \nat \rightarrow \nat \rightarrow
+\bool$ and
+$\mathtt{merge} : (\alpha \rightarrow \alpha \rightarrow
+\bool) \rightarrow \alist \alpha \rightarrow \alist \alpha \rightarrow
+\alist \alpha$ as follows:
+\begin{verbatim}
+merge = [le][l1][l2]case l1 of
+        { Nil z => l2
+        | Cons p1 => case l2 of
+                { Nil z => l1
+                | Cons p2 => case (le p1.HD p2.HD) of
+                        { True  z => Cons(HD=p1.HD,
+                                     TL=merge le p1.TL l2)
+                        | False z => Cons(HD=p2.HD,
+                                     TL=merge le l1 p2.TL) }}};
+
+le_nat = [x][y]case x of
+        { O z  => True()
+        | S x' => case y of
+                { O z  => False()
+                | S y' => le_nat x' y' }};
+
+i = S(O());
+ii = S(S(O()));
+iii = S(S(S(O())));
+iv = S(S(S(S(O()))));
+v = S(S(S(S(S(O())))));
+l1 = Cons(HD=O(), TL=Cons(HD=iii, TL=Cons(HD=iv, TL=Nil())));
+l2 = Cons(HD=i,   TL=Cons(HD=ii,  TL=Cons(HD=v,  TL=Nil())));
+merge le_nat l1 l2;
+\end{verbatim}
+{\bf \foetus\ output:}\nopagebreak
+%\paragraph*{\foetus\ output:}\linebreak
+\begin{verbatim}
+= < <: merge -> merge -> merge
+= = <: merge -> merge
+= < =: merge -> merge
+merge passes termination check by lexical order 1 2
+< <: le_nat -> le_nat
+le_nat passes termination check by lexical order 0
+result: Cons(HD=O(), TL=Cons(HD=S(O()), TL=Cons(HD=S(S(O())),
+     TL=Cons(HD=S(S(S(O()))), TL=Cons(HD=S(S(S(S(O())))),
+     TL=Cons(HD=S(S(S(S(S(O()))))), TL=Nil()))))))
+\end{verbatim}
+\runexample{merge+\%3D+\%5Ble\%5D\%5Bl1\%5D\%5Bl2\%5Dcase+l1+of\%0D\%0A\%09\%7B+Nil+z+\%3D\%3E+l2\%0D\%0A\%09\%7C+Cons+p1+\%3D\%3E+case+l2+of\%0D\%0A\%09\%09\%7B+Nil+z+\%3D\%3E+l1\%0D\%0A\%09\%09\%7C+Cons+p2+\%3D\%3E+case+\%28le+p1.HD+p2.HD\%29+of\%0D\%0A\%09\%09\%09\%7B+True++z+\%3D\%3E+Cons\%28HD\%3Dp1.HD\%2C+TL\%3Dmerge+le+p1.TL+l2\%29\%0D\%0A\%09\%09\%09\%7C+False+z+\%3D\%3E+Cons\%28HD\%3Dp2.HD\%2C+TL\%3Dmerge+le+l1+p2.TL\%29+\%7D\%7D\%7D\%3B\%0D\%0A\%0D\%0Ale_nat+\%3D+\%5Bx\%5D\%5By\%5Dcase+x+of\%0D\%0A\%09\%7B+O+z++\%3D\%3E+True\%28\%29\%0D\%0A\%09\%7C+S+x\%27+\%3D\%3E+case+y+of\%0D\%0A\%09\%09\%7B+O+z++\%3D\%3E+False\%28\%29\%0D\%0A\%09\%09\%7C+S+y\%27+\%3D\%3E+le_nat+x\%27+y\%27+\%7D\%7D\%3B\%0D\%0A\%0D\%0Ai+\%3D+S\%28O\%28\%29\%29\%3B\%0D\%0Aii+\%3D+S\%28S\%28O\%28\%29\%29\%29\%3B\%0D\%0Aiii+\%3D+S\%28S\%28S\%28O\%28\%29\%29\%29\%29\%3B\%0D\%0Aiv+\%3D+S\%28S\%28S\%28S\%28O\%28\%29\%29\%29\%29\%29\%3B\%0D\%0Av+\%3D+S\%28S\%28S\%28S\%28S\%28O\%28\%29\%29\%29\%29\%29\%29\%3B\%0D\%0Al1+\%3D+Cons\%28HD\%3DO\%28\%29\%2C+TL\%3DCons\%28HD\%3Diii\%2C+TL\%3DCons\%28HD\%3Div\%2C+TL\%3DNil\%28\%29\%29\%29\%29\%3B\%0D\%0Al2+\%3D+Cons\%28HD\%3Di\%2C+++TL\%3DCons\%28HD\%3Dii\%2C++TL\%3DCons\%28HD\%3Dv\%2C++TL\%3DNil\%28\%29\%29\%29\%29\%3B\%0D\%0Amerge+le_nat+l1+l2\%3B\%0D\%0A}
+
+\subsection{Parameter permutation: list zipping\label{ex:parmperm}}
+The following function $\mathtt{zip} : \alist \alpha \rightarrow
+\alist \alpha \rightarrow \alist \alpha$ combines two lists into one by
+alternately taking the first elements form these lists and putting
+them into the result list.
+\begin{verbatim}
+zip = [l1][l2]case l1 of
+        { Nil z => l2
+        | Cons p1 => Cons(HD=p1.HD, TL=zip l2 p1.TL) };
+
+zip (Cons(HD=A(), TL=Cons(HD=C(), TL=Nil())))
+    (Cons(HD=B(), TL=Cons(HD=D(), TL=Nil())));
+\end{verbatim}
+{\bf \foetus\ output:}\nopagebreak
+\begin{verbatim}
+? ?: zip -> zip -> zip -> zip
+< <: zip -> zip -> zip
+? ?: zip -> zip
+zip FAILS termination check
+result: Cons(HD=A(), TL=Cons(HD=B(), TL=Cons(HD=C(),
+     TL=Cons(HD=D(), TL=Nil()))))
+\end{verbatim}
+\runexample{zip+\%3D+\%5Bl1\%5D\%5Bl2\%5Dcase+l1+of\%0D\%0A\%09\%7B+Nil+z+\%3D\%3E+l2\%0D\%0A\%09\%7C+Cons+p1+\%3D\%3E+Cons\%28HD\%3Dp1.HD\%2C+TL\%3Dzip+l2+p1.TL\%29+\%7D\%3B\%0D\%0A+\%0D\%0Azip+\%28Cons\%28HD\%3DA\%28\%29\%2C+TL\%3DCons\%28HD\%3DC\%28\%29\%2C+TL\%3DNil\%28\%29\%29\%29\%29\%0D\%0A++++\%28Cons\%28HD\%3DB\%28\%29\%2C+TL\%3DCons\%28HD\%3DD\%28\%29\%2C+TL\%3DNil\%28\%29\%29\%29\%29\%3B\%0D\%0A}
+Here in the recursion of {\tt zip} one arguments is decreasing, but
+arguments are switched. Thus only a even number of recursive calls
+produces a structural decrease on {\tt l1} and {\tt l2}.
+\foetus\ does not recognize {\tt zip} to be terminating because not
+{\em every} (direct or indirect) recursive call makes the arguments smaller
+on any structural lexical order.
+
+Of course there are simple orders
+that fulfill the demanded criteria, like $<$ on {$|l1|+|l2|$}.
+Another solution is to ``copy'' {\tt zip} into {\tt zip'} and implement
+{\em mutual recursion} as follows:
+\begin{verbatim}
+zip = [l1][l2]case l1 of
+        { Nil z => l2
+        | Cons p1 => Cons(HD=p1.HD, TL=zip' l2 p1.TL) },
+zip'= [l1][l2]case l1 of
+        { Nil z => l2
+        | Cons p1 => Cons(HD=p1.HD, TL=zip l2 p1.TL) };
+
+zip (Cons(HD=A(), TL=Cons(HD=C(), TL=Nil())))
+    (Cons(HD=B(), TL=Cons(HD=D(), TL=Nil())));
+\end{verbatim}
+{\bf \foetus\ output:}\nopagebreak
+\begin{verbatim}
+< <: zip -> zip' -> zip
+zip passes termination check by lexical order 0
+< <: zip' -> zip -> zip'
+zip' passes termination check by lexical order 0
+result: Cons(HD=A(), TL=Cons(HD=B(), TL=Cons(HD=C(), TL=Cons(HD=D(),
+TL=Nil()))))
+\end{verbatim}
+\runexample{zip+\%3D+\%5Bl1\%5D\%5Bl2\%5Dcase+l1+of\%0D\%0A\%09\%7B+Nil+z+\%3D\%3E+l2\%0D\%0A\%09\%7C+Cons+p1+\%3D\%3E+Cons\%28HD\%3Dp1.HD\%2C+TL\%3Dzip\%27+l2+p1.TL\%29+\%7D\%2C\%0D\%0Azip\%27\%3D+\%5Bl1\%5D\%5Bl2\%5Dcase+l1+of\%0D\%0A\%09\%7B+Nil+z+\%3D\%3E+l2\%0D\%0A\%09\%7C+Cons+p1+\%3D\%3E+Cons\%28HD\%3Dp1.HD\%2C+TL\%3Dzip+l2+p1.TL\%29+\%7D\%3B\%0D\%0A+\%0D\%0Azip+\%28Cons\%28HD\%3DA\%28\%29\%2C+TL\%3DCons\%28HD\%3DC\%28\%29\%2C+TL\%3DNil\%28\%29\%29\%29\%29\%0D\%0A++++\%28Cons\%28HD\%3DB\%28\%29\%2C+TL\%3DCons\%28HD\%3DD\%28\%29\%2C+TL\%3DNil\%28\%29\%29\%29\%29\%3B\%0D\%0A}
+
+%\subsection{Parameter permutation\label{ex:parmperm}}
+%\begin{verbatim}
+%f = [x][y]case x of
+%        { O o  => O()
+%        | S x' => f y x' };
+%\end{verbatim}
+%{\bf \foetus\ output:}\nopagebreak
+%\begin{verbatim}
+%? ?: f -> f -> f -> f
+%< <: f -> f -> f
+%? ?: f -> f
+%f FAILS termination check
+%\end{verbatim}
+%\runexample{f+\%3D+\%5Bx\%5D\%5By\%5Dcase+x+of+\%0D\%0A\%09\%7B+O+o++\%3D\%3E+O\%28\%29\%0D\%0A\%09\%7C+S+x\%27+\%3D\%3E+f+y+x\%27+\%7D+\%0D\%0A}
+%Here in the recursion of {\tt f} one arguments is decreasing, but
+%arguments are switched. Thus only a even number of recursive calls
+%produces a structural decrease on {\tt x} and {\tt y}.
+%\foetus\ does not recognize {\tt f} to be terminating because not
+%{\em every} (direct or indirect) recursive call makes the arguments smaller
+%on any structural lexical order.
+
+%Of course there are simple orders
+%that fulfill the demanded criteria, like $<$ on {\tt x}+{\tt y}.
+%Another solution is to ``copy'' {\tt f} into {\tt f'} and implement
+%mutual recursion as follows:
+%\begin{verbatim}
+%f = [x][y]case x of
+%        { O o  => O()
+%        | S x' => f' y x' },
+%f' = [x][y]case x of
+%        { O o  => O()
+%        | S x' => f y x' };
+%\end{verbatim}
+%{\bf \foetus\ output:}\nopagebreak
+%\begin{verbatim}
+%< <: f -> f' -> f
+%f passes termination check by lexical order 0
+%< <: f' -> f -> f'
+%f' passes termination check by lexical order 0
+%\end{verbatim}
+%\runexample{f+\%3D+\%5Bx\%5D\%5By\%5Dcase+x+of+\%0D\%0A\%09\%7B+O+o++\%3D\%3E+O\%28\%29\%0D\%0A\%09\%7C+S+x\%27+\%3D\%3E+f\%27+y+x\%27+\%7D\%2C+\%0D\%0Af\%27+\%3D+\%5Bx\%5D\%5By\%5Dcase+x+of+\%0D\%0A\%09\%7B+O+o++\%3D\%3E+O\%28\%29\%0D\%0A\%09\%7C+S+x\%27+\%3D\%3E+f+y+x\%27+\%7D\%3B\%0D\%0A}
+
+\subsection{Tuple parameter\label{ex:tupelparm}}
+This example, an alternative version of $\mathtt{add} :
+\mathtt{(X} : \nat \mathtt{, Y} : \nat \mathtt{)} \rightarrow \nat$, shows that \foetus\
+loses dependency information if you ``pack'' and ``unpack'' tuples.
+\begin{verbatim}
+add = [xy]case xy.X of
+        { O z => xy.Y
+        | S x' => S(add (X=x', Y=xy.Y)) };
+\end{verbatim}
+{\bf \foetus\ output:}\nopagebreak
+\begin{verbatim}
+?: add -> add
+add FAILS termination check
+\end{verbatim}
+\runexample{add+\%3D+\%5Bxy\%5Dcase+xy.X+of+\%0D\%0A\%09\%7B+O+z+\%3D\%3E+xy.Y\%0D\%0A\%09\%7C+S+x\%27+\%3D\%3E+S\%28add+\%28X\%3Dx\%27\%2C+Y\%3Dxy.Y\%29\%29+\%7D\%3B\%0D\%0A}
+
+\subsection{Transfinite addition of ordinal numbers\label{ex:addord}}
+The type of ordinal numbers is
+$$
+   \ord := \Let{\ord = \{ \mathtt{O()} | \mathtt{S(} \ord \mathtt{)} |
+        \mathtt{Lim(} \nat \rightarrow \ord \mathtt{)} \} }{\ord}
+$$
+and $\mathtt{addord} : \ord \rightarrow \ord \rightarrow \ord$ can be
+implemented as follows:
+\begin{verbatim}
+addord = [x][y]case x of
+        { O o => y
+        | S x' => S(addord x' y)
+        | Lim f => Lim([z]addord (f z) y) };
+\end{verbatim}
+{\bf \foetus\ output:}\nopagebreak
+\begin{verbatim}
+< =: addord -> addord
+addord passes termination check by lexical order 0
+\end{verbatim}
+\runexample{addord+\%3D+\%5Bx\%5D\%5By\%5Dcase+x+of+\%0D\%0A\%09\%7B+O+o+\%3D\%3E+y\%0D\%0A\%09\%7C+S+x\%27+\%3D\%3E+S\%28addord+x\%27+y\%29+\%0D\%0A\%09\%7C+Lim+f+\%3D\%3E+Lim\%28\%5Bz\%5Daddord+\%28f+z\%29+y\%29+\%7D\%3B\%0D\%0A}
+
+\subsection{Fibonacci numbers\label{ex:fib}}
+Iterative version
+$\mathtt{fib}: \nat \rightarrow \nat$
+of algorithm to calculate the fibonacci numbers
+$\mathrm{fib}(0)=1$, $\mathrm{fib}(1)=1$, 2, 3, 5, 8, $\dots$. Only
+the first parameter is important for termination, the
+second and the third parameter are ``accumulators''.
+\begin{verbatim}
+fib' = [n][fn][fn']case n of
+        { O z  => fn
+        | S n' => fib' n' (add fn fn') fn};
+fib = [n]fib' n (S(O())) (O());
+\end{verbatim}
+{\bf \foetus\ output:}\nopagebreak
+\begin{verbatim}
+< ? ?: fib' -> fib' -> fib'
+< ? ?: fib' -> fib'
+fib' passes termination check by lexical order 0
+fib passes termination check
+\end{verbatim}
+\runexample{add+\%3D+\%5Bx\%5D\%5By\%5Dcase+x+of+\%7B+O+z+\%3D\%3E+y+\%7C+S+x\%27+\%3D\%3E+S\%28add+x\%27+y\%29+\%7D\%3B\%0D\%0A\%0D\%0Afib\%27+\%3D+\%5Bn\%5D\%5Bfn\%5D\%5Bfn\%27\%5Dcase+n+of\%0D\%0A+\%7B+O+z+\%3D\%3E+fn\%0D\%0A+\%7C+S+n\%27+\%3D\%3E+fib\%27+n\%27+\%28add+fn+fn\%27\%29+fn\%7D\%3B\%0D\%0Afib+\%3D+\%5Bn\%5Dfib\%27+n+\%28S\%28O\%28\%29\%29\%29+\%28O\%28\%29\%29\%3B\%0D\%0A\%0D\%0A\%28fib+\%28S\%28S\%28S\%28S\%28S\%28O\%28\%29\%29\%29\%29\%29\%29\%29\%29\%3B+\%0D\%0A}
+
+\subsection{Non-terminating mutual recursion}
+The following three functions $\mathtt{f}, \mathtt{g}, \mathtt{h} :
+\nat \rightarrow \nat \rightarrow \nat$ are
+an artificial example for non-termination that has been designed to
+show to what extent the call graph has to be completed to assure
+correct results of the termination checker. Function {\tt h}
+(here $h(x,y)=0 \;\forall
+%\;\mathrm{natural}\;\mathrm{numbers}\;
+x, y$) could be any function
+that ``looks into'' its arguments, e.g. {\tt add}.
+\begin{verbatim}
+h = [x][y]case x of
+        { O z  => case y of
+                { O z  => O()
+                | S y' => h x y' }
+        | S x' => h x' y },
+
+f = [x][y]case x of
+        { O z  => O()
+        | S x' => case y of
+                { O z  => O()
+                | S y' => h (g x' y) (f (S(S(x))) y') } },
+
+g = [x][y]case x of
+        { O z  => O()
+        | S x' => case y of
+                { O z  => O()
+                | S y' => h (f x y) (g x' (S(y))) } };
+
+(* f (S(S(O()))) (S(S(O()))); *)
+\end{verbatim}
+{\bf \foetus\ output:} Note that the combined call $f \rightarrow g
+\rightarrow f$ still does not prevent termination. But then call graph
+completion finds $f \rightarrow g \rightarrow g \rightarrow f$ that
+destroys the lexical order 1 0 that was possible until then.
+\begin{verbatim}
+< <: h -> h -> h
+< =: h -> h
+= <: h -> h
+h passes termination check by lexical order 0 1
+< ?: f -> g -> g -> f
+? ?: f -> f -> g -> g -> f
+< =: f -> g -> f
+? <: f -> f
+f FAILS termination check
+? <: g -> f -> f -> g
+? ?: g -> g -> f -> f -> g
+< =: g -> f -> g
+< ?: g -> g
+g FAILS termination check
+\end{verbatim}
+\runexample{h+\%3D+\%5Bx\%5D\%5By\%5Dcase+x+of\%0D\%0A\%09\%7B+O+z++\%3D\%3E+case+y+of\%0D\%0A\%09\%09\%7B+O+z++\%3D\%3E+O\%28\%29\%0D\%0A\%09\%09\%7C+S+y\%27+\%3D\%3E+h+x+y\%27+\%7D\%0D\%0A\%09\%7C+S+x\%27+\%3D\%3E+h+x\%27+y+\%7D\%2C\%0D\%0A\%0D\%0Af+\%3D+\%5Bx\%5D\%5By\%5Dcase+x+of+\%0D\%0A\%09\%7B+O+z++\%3D\%3E+O\%28\%29\%0D\%0A\%09\%7C+S+x\%27+\%3D\%3E+case+y+of+\%0D\%0A\%09\%09\%7B+O+z++\%3D\%3E+O\%28\%29\%0D\%0A\%09\%09\%7C+S+y\%27+\%3D\%3E+h+\%28g+x\%27+y\%29+\%28f+\%28S\%28S\%28x\%29\%29\%29+y\%27\%29+\%7D+\%7D\%2C\%0D\%0A\%0D\%0Ag+\%3D+\%5Bx\%5D\%5By\%5Dcase+x+of+\%0D\%0A\%09\%7B+O+z++\%3D\%3E+O\%28\%29+\%0D\%0A\%09\%7C+S+x\%27+\%3D\%3E+case+y+of+\%0D\%0A\%09\%09\%7B+O+z++\%3D\%3E+O\%28\%29\%0D\%0A\%09\%09\%7C+S+y\%27+\%3D\%3E+h+\%28f+x+y\%29+\%28g+x\%27+\%28S\%28y\%29\%29\%29+\%7D+\%7D\%3B\%0D\%0A\%0D\%0A\%28*+f+\%28S\%28S\%28O\%28\%29\%29\%29\%29+\%28S\%28S\%28O\%28\%29\%29\%29\%29\%3B+*\%29\%0D\%0A}
+
+%\subsection{}
+%\begin{verbatim}
+
+%\end{verbatim}
+%{\bf \foetus\ output:}\nopagebreak
+%%\paragraph*{\foetus\ output:}\linebreak
+%\begin{verbatim}
+
+%\end{verbatim}
+%\runexample{}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "foetus"
+%%% End:

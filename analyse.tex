@@ -1,0 +1,104 @@
+% analyse.tex
+%
+% function call extraction and forming of the call graph
+
+\subsection{Function call extraction\label{sec:funex}}
+
+The task of \foetus\ is to check whether functions terminate or
+not. Because the \foetus\ language is functional and no direct loop
+constructs  exist, the only means to form loops is
+recursion. Therefore out of the program text all function calls have
+to be extracted to find direct or indirect recursive calls that may
+cause termination problems.
+
+The heart of \foetus\ is a analyzer that runs through the syntax tree of
+the given \foetus\ program and looks for {\em applications}.
+Consecutive applications are gathered and formed in to a
+{\em function call}, e.g. in example \ref{ex:add}, function {\tt add}.
+%\begin{example}Addition\label{ex:add}\nopagebreak
+%\begin{verbatim}
+%add = [x][y]case x of
+%        { O z => y
+%        | S x' => S(add x' y) };
+%\end{verbatim}
+%\end{example}
+There the two applications \ttverb{((add x') y)} form the call
+$\mathrm{add}(x',y)$. As you see in this example ``add'' is always terminating
+because in each recursive call the first argument $x$ is
+decreased. \foetus\ stores with each call information about how the
+arguments of the call ($x'$, $y$ in the example) relate to the parameters
+of the calling function (here: $x$, $y$), the so-called depedencies (here:
+$x'<x$, $y=y$). We distinguish three kinds of relations: $\less$
+(less), $\equal$ (equal) and $\unknown$ (unknown, this includes `greater').
+
+The abilities of \foetus\ to recognise dependencies are yet very
+limited. So far only three cases are considered:
+\begin{enumerate}
+\item Constructor elimination.\label{rule:CEl}\\
+Be $x$, $y$ variables and $C$ a constructor, and $x=C(y)$. It follows
+$y \less x$. This is applied in case constructs (see example above).
+\item Projection.\label{rule:Proj}\\
+Be $x$, $y$ variables, $L$ a label, $\rho$ a relation in $\{\less,
+\equal\}$ and $y \,\rho\, x$. Here it follows $y.L \,\rho\, x$, i.d. a
+component is considered as big as the entire tuple.
+\item Application.\label{rule:App}\\
+Be $x$, $y$ variables, $a$ a vector of terms (arguments of $y$),
+$\rho$ a relation in $\{\less, \equal\}$ and $y \,\rho\, x$. It
+follows $(y a) \,\rho\, x$.
+\end{enumerate}
+The rule \ref{rule:App} may have a strange looking, but it can be
+applied in example \ref{ex:addord} ({\tt addord}).
+%\begin{example}Transfinite addition of ordinal numbers\label{ex:ordadd}\nopagebreak
+%\begin{verbatim}
+%add = [x][y]case x of
+%        { O o => y
+%        | S x' => S(add x' y)
+%        | Lim f => Lim([z]add (f z) y) };
+%\end{verbatim}
+%\end{example}
+In the third case $x = \mathrm{Lim}(f)$ we have with rule
+\ref{rule:CEl} $f \infixless x$ and with rule \ref{rule:App}
+$(f z) \infixless x$, therefore {\tt addord} is terminating.
+
+\subsection{Call graph}
+In the end the whole of extracted function calls form the {\em call
+  graph}. It is a multigraph; each vertex represents a function and each
+edge from vertex $f$ to vertex $g$ a call of function $g$ within the
+function of $f$. The edges are labeled with the dependency information
+(see above) put in a {\em call matrix}. The call matrix for the only
+one call $\mathrm{add}\rightarrow\mathrm{add}$ in example \ref{ex:add}
+would be
+\begin{center}
+\begin{tabular}{c|cc}
+     &   $x$      &    $y$ \\
+\hline
+$x'$ & $\less$    & $\unknown$ \\
+$y$  & $\unknown$ & $\equal$
+\end{tabular}
+\end{center}
+Note that each row represents one call argument and its relations to
+the calling function parameters.
+
+Now if a function $f$ calls a function $g$ and the latter calls
+another function $h$, $f$ indirectly calls $h$. The call matrix of
+this {\em combined call} $f \rightarrow h$ is the product of the two
+matrices of $g \rightarrow h$ and  $f \rightarrow g$. We get the
+{\em completed call graph} if we insert all combined calls (as new
+edges) into the original graph.
+
+To find out whether a function $f$ is terminating you have to collect
+all calls from $f$ to itself out of the completed call graph (this
+includes the direct and the indirect calls). When a {\em lexical order}
+exists on the function parameters of $f$ so that every recursive call
+decreases the order of the parameters, we have proven the termination
+of f. This order we call {\em termination order}.
+
+We could call the algorithms of call graph completion and finding a
+lexical order the ``brain'' of \foetus; it is described more precisely
+and formally in the next section.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "foetus"
+%%% TeX-master: "foetus"
+%%% End:

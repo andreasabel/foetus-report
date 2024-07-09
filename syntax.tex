@@ -1,0 +1,65 @@
+% syntax.tex
+
+A \foetus\ program consists of {\em terms} and {\em definitions}.
+\begin{center}
+\begin{tabular}{rcll}
+$P$ & $::$ &                       & {\it empty program} \\
+    & $|$  & {\it term};       $P$ & {\it term to be evaluated} \\
+    & $|$  & {\it definition}; $P$ & {\it definition for further use}
+\end{tabular}
+\end{center}
+When processing input, \foetus\ evaluates the terms and stores the
+definitions in the environment. ``Reserved words'' in the \foetus\
+language are {\tt case}, {\tt of}, {\tt let} and {\tt in}.
+%{\tt (}, {\tt )}, {\tt [}, {\tt ]}, {\tt \{}, {\tt \}}, {\tt |},
+%{\tt .}, {\tt
+Special characterss are {\tt ( ) [ ] \{ \} | .\ , ; = =>}. An identifier may
+contain letters, digits, apostrophies and underscores.
+If it starts with a small letter it stands for a variable,
+else it denotes a constant.
+\paragraph*{Term syntax.} In the following
+$x$, $x_1$, $x_2$, $\dots$ denote variables,
+$C$, $C_1$, $C_2$, $\dots$ constants and
+$u$, $t$, $t_1$, $t_2$, $\dots$ \foetus\ terms.
+\begin{center}
+\begin{tabular}{rcll}
+$t$ & $::$ & $x$       & {\it variable} \\
+    & $|$  & $[x]t$    & {\it lambda} \\
+    & $|$  & $t u$     & {\it application} \\
+    & $|$  & $C(t)$    & {\it constructor} \\
+    & $|$  & case $t$ of \{ $C_1 x_1 \darr t_1 | \dots | C_n x_n
+      \darr t_n$ \}    & {\it pattern matching} \\
+    & $|$  & $(C_1 = t_1, \dots, C_n = t_n)$
+                       & {\it tuple} \\
+    & $|$  & $t.C$     & {\it projection} \\
+    & $|$  & let $x_1 = t_1, \dots, x_n = t_n$ in $t$
+                       & {\it let} \\
+    & $|$  & (t)       & {\it (extra parentheses) }
+\end{tabular}
+\end{center}
+
+\paragraph*{Definitions.}
+A definition statement has the form $x_1 = t_1, \dots, x_n = t_n$ (it
+is a let-term without a ``body''). All variables $x_1, \dots, x_n$ are
+defined simultanously, thus can refer to each other.
+
+\paragraph*{Example.} The following \foetus\ program defines addition
+on natural numbers (spanned by the two constructors {\tt O} ``zero'' and
+{\tt S} ``successor'') and calculates $1+1$.
+
+\begin{verbatim}
+add = [x][y]case x of
+        { O z => y
+        | S x' => S(add x' y) };
+one = S(O());
+add one one;
+\end{verbatim}
+
+Note that although {\tt O} is a zero-argument-constructor the syntax
+forces us to supply a dummy variable {\tt z} within the pattern
+definition and also empty tuple {\tt ()} in the definition of {\tt one}.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "foetus"
+%%% End:

@@ -1,0 +1,142 @@
+% language.tex
+
+\subsection{\foetus\ Syntax\label{sec:syntax}}
+\input{syntax}
+
+\subsection{\foetus\ Type System}
+In the following $x$, $x_1$, $x_2$, $\dots$ denote variables,
+$C$, $C_1$, $C_2$, $\dots$ constants,
+%$l$, $l_1$, $l_2$, $\dots$ labels,
+$u$, $t$, $t_1$, $t_2$, $\dots$ \foetus\ terms,
+$\tau$, $\sigma$, $\sigma_1$, $\sigma_2$, $\dots$ \foetus\ types and
+$X$, $X_1$, $X_2, \dots$ type variables.
+$\G = x_1:\sigma_1, \dots, x_n:\sigma_n$ denotes the context.
+The judgement
+$$
+    \G \vdash t:\sigma
+$$
+means ``in context $\G$ term $t$ is of type $\sigma$''.
+\pagebreak
+
+\paragraph*{Type formation.}\nopagebreak[4]
+\begin{center}
+\begin{tabular}{rcll}
+$\tau$ & $::$ & $\sigma \rightarrow \tau$
+           & {\it $\rightarrow$-type} \\
+    & $|$  & $\{ C_1 : \sigma_1 | \dots | C_n : \sigma_n \}$
+           & {\it labeled sum type} \\
+    & $|$  & $( C_1 : \sigma_1 , \dots, C_n : \sigma_n )$
+           & {\it labeled product type} \\
+    & $|$  & $\Pitype{ X } \tau$
+           & {\it polymorphic type} \\
+    & $|$  & $\tau \sigma$
+           & {\it instantiation of polymorphic type} \\
+    & $|$  & $\Let{X_1 = \sigma_1, \dots, X_n = \sigma_n}{\tau}$
+           & {\it recursive type}
+\end{tabular}
+\end{center}
+In the formation of a recursive type with Let $X_i$ may only appear
+strict positiv in $\sigma_i$. We define congruence on types $\cong$ as
+the smallest congruence closed under
+$$
+    \Let{\vec{X} = \vec{\sigma}}{\tau} \cong \tau[X_1 := \Let{\vec{X} =
+\vec{\sigma}}{X_1}; \dots; X_n := \Let{\vec{X} =
+\vec{\sigma}}{X_n}]
+$$
+($\vec{X}=\vec{\sigma}$ abbreviates $X_1 = \sigma_1, \dots, X_n =
+\sigma_n$). Thus we can substitute congruent types:
+$$
+\ru{\G\vdash t:\sigma \quad \sigma\cong\tau}
+   {\G \vdash t: \tau}
+$$
+For ploymorphic types we have rules like in System F:
+$$
+\rux{\G \vdash t : \sigma \quad \mbox{$X$ not free type variable in $\G$}}
+    {\G \vdash t : \{X\}\sigma}
+    {poly-i}
+$$
+$$
+\rux{\G \vdash t: \{X\}\sigma}
+    {\G \vdash t: \sigma[X:=\tau]}
+    {poly-e}
+$$
+
+
+\subsection{Typing rules for \foetus\ terms}
+
+We here only briefly introduce the typing rules. For more detailed
+explanation, read a book about type theorie, e.g. \cite{NPS90}.
+
+\paragraph*{Lambda abstraction.}
+$$
+\rux{\G,x:\sigma \vdash t:\tau}
+    {\G \vdash [x]t : \sigma \rightarrow \tau}
+    {\rightarrow-i}
+$$
+
+\paragraph*{Application.}
+$$
+\rux{\G \vdash t:\sigma\rightarrow\tau \quad \G \vdash u:\sigma}
+    {\G \vdash t u : \sigma}
+    {\rightarrow-e}
+$$
+
+\paragraph*{Constructor.}
+\[
+\rux{\G\vdash t:\sigma_i}
+    {\G\vdash C_i(t) : \{ C_1 : \sigma_1 | \dots | C_n : \sigma_n \}}
+    {\{\}-i}
+\]
+
+\paragraph*{Pattern matching.}
+\[
+\rux{\G\vdash t: \{ C_1 : \sigma_1 | \dots | C_n : \sigma_n \}\qquad
+     \G,x_i:\sigma_i \vdash u_i : \sigma \ \mbox{for all $1 \leq i
+       \leq n$}}
+    {\G\vdash \case{t}{C_1(x_1)\darr u_1 | \dots | C_n(x_n)\darr u_n}
+      : \sigma}
+    {\{\}-e}
+\]
+
+\paragraph*{Tupels.}
+\[
+\rux{\G\vdash t_i : \sigma_i\ \mbox{for all $1\leq i\leq n$}}
+    {\G\vdash (C_1=t_1,\dots,C_n=t_n) : ( C_1 : \sigma_1 , \dots ,
+  C_n : \sigma_n )}
+    {()-i}
+\]
+
+\paragraph*{Projection.}
+\[
+\rux{\G\vdash t:( C_1 : \sigma_1 , \dots , C_n : \sigma_n )} {\G\vdash t.C_i
+  : \sigma_i} {()-e}
+\]
+
+\paragraph*{Let.}
+\[
+\rux{\G,x_1:\sigma_1,\dots,x_n:\sigma_n \vdash t_i : \sigma_i \
+  \mbox{for all $1\leq i\leq n$} \qquad \G,x_1:\sigma_1,\dots
+  ,x_n:\sigma_n \vdash u : \tau} {\G\vdash \xlet{x_1=t_1;\dots
+    ;x_n=t_n}{u}:\tau} {let}
+\]
+In \foetus\ type checking is not yet implemented and it is assummed
+that all terms entered are well typed. Of course, only for well typed
+terms the termination check produces valid results.
+\paragraph*{Example.} The following well-known example for
+non-termination passes the \foetus\ termination checker, but it is not
+well typed.
+\begin{verbatim}
+f = [x]x x;
+a = f f;
+\end{verbatim}
+\foetus\ output:\nopagebreak
+\begin{verbatim}
+f passes termination check
+a passes termination check
+\end{verbatim}
+\runexample{f+\%3D\%5Bx\%5Dx+x\%3B\%0D\%0Aa+\%3D+f+f\%3B\%0D\%0A}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "foetus"
+%%% End:

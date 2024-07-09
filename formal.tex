@@ -1,0 +1,399 @@
+% formal.tex - Formal description
+
+
+\subsection{Call Matrix}
+Be $R = \{\less, \equal, \unknown\}$ set of the relations ``less
+than'',  ``equal to'' and ``relation unknown''. In the context of
+``$f(x,y)$ calls $g(a,b)$'' $a \infixless y$ means ``we know that (call)
+argument $a$ is less than (input) parameter $y$'', $a \infixequal y$ means
+``$a$ is (at least) equal to $y$ (if not less than)'' and $a \infixunknown
+y$ means ``we do not know the relation between $a$ and $y$''.
+
+With the two operations
+$+$ and $\cdot$ defined as in table \ref{tabOpR} $R$ forms a
+commutative
+\htmladdnormallink{rig\footnote{On the WWW I found the English term
+    ``rig'' for what Germans call a ``Halb\-ring''. This is probably a
+    play of words: Compared  to a ``ring'' a ``rig'' misses an ``n''
+    as well as inverse elements regarding addition. I cite Ross Moore
+(see {\tt \htmladdnormallink{http://www.mpce.mq.edu.au/\tttilde{}ross/maths/Quantum/Sect1.html\#206}{http://www.mpce.mq.edu.au/~ross/maths/Quantum/Sect1.html#206}}):
+\begin{quote}
+A {\em rig} is a set $R$ enriched with two monoid structures, a
+commutative one written additively and the other written
+multiplicatively, such that the following equations hold:
+$$
+            a 0 = 0 = 0 a
+$$
+$$
+    a (b + c) = a b + a c, \qquad (a + b) c = a c + a b
+$$
+The natural numbers $\N$ provide an example of a rig.
+
+A {\em ring} is a rig for which the additive monoid is a group. The
+integers  $\Z$ provide an example.
+
+A rig is {\em commutative}  when the multiplicative monoid is commutative.
+\end{quote}
+}}{http://www.mpce.mq.edu.au/~ross/maths/Quantum/Sect1.html#206}
+with $0$-element $\unknown$ and $1$-element $\equal$. The operation $+$ can be
+understood as ``combining {\em parallel} information about a relation'',
+e.g. if we have $a \infixunknown y$ and $a \infixless y$ we have $a
+\,(\unknown + \less)\, y$ and that simplifies to $a \infixless y$.
+The operation
+$\cdot$ however is ``{\em serial} combination'', e.g. $a \infixless y$
+and $y \infixequal z$ can be combined into $a \,(\less \cdot \equal)\, z$,
+simplified: $a \infixless z$. $\unknown$ is neutral regarding $+$ because
+it gives you no new information, whereas $\less$ is dominant because
+it is the strongest information. Regarding $\cdot$ the relation
+$\equal$ is neutral
+and $\unknown$ is dominant because it ``destroys'' all
+information. Check the table to see which relation overrides which.
+
+\begin{table}[h]
+  \begin{center}
+    \leavevmode
+\hbox{
+\hbox{
+\begin{tabular}{c|ccc}
+$+$        & $\less$ & $\equal$ & $\unknown$ \\
+\hline
+$\less$    & $\less$ & $\less$  & $\less$ \\
+$\equal$   & $\less$ & $\equal$ & $\equal$ \\
+$\unknown$ & $\less$ & $\equal$ & $\unknown$
+\end{tabular}
+}%
+\hspace{2cm}%
+\hbox{
+\begin{tabular}{c|ccc}
+$\cdot$    & $\less$    & $\equal$   & $\unknown$ \\
+\hline
+$\less$    & $\less$    & $\less$    & $\unknown$ \\
+$\equal$   & $\less$    & $\equal$   & $\unknown$ \\
+$\unknown$ & $\unknown$ & $\unknown$ & $\unknown$
+\end{tabular}%
+}
+}
+    \caption{Operations on $R$}
+    \label{tabOpR}
+  \end{center}
+\end{table}
+
+Now we can define multiplication on matrices over R as usual:
+$$
+    \cdot : R^{n \times m} \times R^{m \times l} \rightarrow R^{n
+      \times l}
+$$
+$$
+    \left((a_{ij}), (b_{ij})\right) \mapsto (c_{ij}) = \left(
+      \sum_{k=1}^m a_{ik} b_{kj} \right)
+$$
+Why is this a reasonable definition? Assume you have three sets of
+variables $\{x_1, \dots, x_n\}$, $\{y_1, \dots, y_m\}$ and $\{z_1,
+\dots, z_l\}$, a matrix $A=(a_{ij}) \el R^{n \times m}$ reflecting the
+relations between the $x_i$s and the $y_i$s (i.d. $a_{ij} = \rho \iff
+x_i \,\rho\, y_j$) and a matrix $B \el R^{m \times l}$ reflecting the
+relations between the $y_i$s and the $z_i$s. Then the matrix product
+$C=AB$ reflects the relations between the $x_i$s and the $z_i$s. Because
+$$
+    c_{ij} = a_{i1} \cdot b_{1j} + a_{i2} \cdot b_{2j} + \dots +
+    a_{im} \cdot b_{mj},
+$$
+we have e.g. $x_i \infixless z_j$ if we know it by intermediate variable $y_1$
+($a_{i1} \cdot b_{1j} = \quotless$) {\em or} by intermediate variable
+$y_2$ {\em or} $\dots$ (to be continued).
+
+\paragraph*{Definition.}
+A {\em call matrix} is a matrix over $R$ with no more than one element
+different from $\unknown$ per row.
+$$
+    \mathrm{CM}(n,m) := \{ (a_{ij}) \el R^{n \times m} : \forall i
+%    \lnot \exists j \exists k \not= j : a_{ij} \not= \unknown \land a_{ik}
+%    \not= \unknown \}
+    \forall j \forall k \not= j ( a_{ij} = \unknown \lor a_{ik} = \unknown) \}
+$$
+\paragraph*{Remark.} The reason we define call matrices this way is
+these are the only ones \foetus\ produces by function call extraction
+(see section \ref{sec:funex}). Because \foetus\ recognizes only the
+three described cases of dependecies, a call argument can only depend
+of {\em one} function parameter. But multiple dependecies are
+imaginable, like in
+\begin{verbatim}
+f(x,y) = if (x=0) then 0 else let a=min(x,y)-1 in f(a,x)
+\end{verbatim}
+Here the second call argument {\tt a} is less than both {\tt x} and
+{\tt y}. The next proposition assures that all matrices \foetus\ will
+have do deal with are {\em call} matrices.
+\paragraph*{Proposition.}
+Matrix multiplication on matrices induces a multiplication on call matrices
+$$
+    \cdot : \mathrm{CM}(n,m) \times \mathrm{CM}(m,l) \rightarrow
+    \mathrm{CM}(n,l)
+$$
+This operation is well defined.
+\paragraph*{Proof.}
+Be $A = (a_{ij}) \el \mathrm{CM}(n,m)$, $B = (b_{ij}) \el
+\mathrm{CM}(m,l)$, $AB = C = (c_{ij}) \el R^{n \times l}$ and $k(i)$ the
+index of the element of the $i$th row of $A$ that is different to
+$\unknown$ (or 1, if no such element exists). The we have with the
+rules in rig $R$
+$$
+    c_{ij} = \sum_{k=1}^m a_{ik} b_{kj} = a_{i,k(i)} b_{k(i),j}
+$$
+Now consider the $i$th row of $C$:
+$$
+    c_i = (c_{ij})_{1 \leq j \leq l} = (a_{i,k(i)} b_{k(i),j})_{1 \leq
+      j \leq l}
+$$
+Because at most one $b_{k(i),j}$ is unequal to $\unknown$, at most one
+element of $c_i$ is unequal to $\unknown$. Therefore $C \el
+\mathrm{CM}(n,l)$.
+
+\subsection{Call Graph}
+For each $i \el \N$ we assume a set $F^{(i)} = \{f^{(i)}, g^{(i)},
+h^{(i)}, ...\}$ of identifiers for functions of arity $i$,
+$\mathcal{F} = \biguplus_{i \el \N} F^{(i)}$.
+\paragraph*{Definition.}
+We form the set of {\em calls} as follows
+$$
+   \mathcal{C} = \{ (f^{(n)}, g^{(m)}, A) : f^{(n)} \el F^{(n)},
+   g^{(m)} \el F^{(m)}, A \el \mathrm{CM}(m,n) \}
+$$
+On calls we define the partial operation {\em combination of calls}
+$$
+   \circ : \mathcal{C} \times \mathcal{C} \rightarrow \mathcal{C}
+$$
+$$
+   \left( (g^{(m)}, h^{(l)}, B), (f^{(n)}, g^{(m)}, A) \right) \mapsto
+   (f^{(n)}, h^{(l)}, BA)
+$$
+Meaning: If $g$ calls $h$ with call matrix $B$ and $f$ calls $g$ with
+call matrix $A$, then $f$ indirectly calls $h$ with call matrix
+$BA$. $\circ$ cannot be applied to calls that have no ``common
+function'' like $g$, therefore it is partial. $\circ$ can be expanded
+to sets of calls
+$$
+   \circ : \mathcal{P}(\mathcal{C}) \times \mathcal{P}(\mathcal{C})
+   \rightarrow \mathcal{P}(\mathcal{C})
+$$
+%\begin{makeimage}
+%\begin{center}
+$$
+   (C, C') \mapsto \{ c \circ_{\mathcal{C}} c' : c \el C,
+       c' \el C',
+       (c,c') \el \mathrm{Dom}(\circ_{\mathcal{C}}) \}
+$$
+%\end{center}
+%\end{makeimage}
+Here we combine each call in $C$ with each call in $\hat C$ to which
+$\circ_{\mathcal{C}}$ is applicable and form a set of the combined
+calls. $\circ_{\mathcal{P}(\mathcal{C})}$ is a total function.
+\paragraph*{Definition.}
+A {\em call graph} is a graph $(V,E)$ with
+vertices $V = \mathcal F$ and edges $E \finitsubset \mathcal{C}$.
+A call graph is {\em complete} if
+$$
+    E \circ E \subseteq E
+$$
+
+\paragraph*{Definition.}
+The {\em completion} of a call graph $(V,E)$ is a call graph $(V,E')$
+such that
+\renewcommand{\labelenumi}{(\arabic{enumi})}
+\begin{enumerate}
+\item $(V,E')$ is complete,\label{complete1}
+\item $E \subseteq E'$ and\label{complete2}
+\item for all $E''$ satisfying (\ref{complete1}) and
+  (\ref{complete2}) we have $E' \subseteq E''$.
+\end{enumerate}
+
+\paragraph*{Proposition.}
+The completion of a call graph $(V,E)$ is the call graph $(V,E')$
+such that
+$$
+    c \el E' \iff \exists n>0, c_1, \dots, c_n \el E : c_1 \circ \dots \circ
+    c_n = c
+$$
+\paragraph*{Proof.}
+\begin{enumerate}
+\item
+Be $c \el E' \circ E'$. Then there are $d,e \el E'$ with $c = d \circ
+e$. Because $(V,E')$ is complete, we have
+\begin{eqnarray*}
+    d = d_1 \circ \dots \circ d_n & \qquad & d_1,\dots,d_n \el E \\
+    e = e_1 \circ \dots \circ e_m & \qquad & e_1,\dots,e_m \el E
+\end{eqnarray*}
+Thus $c = d_1 \circ \dots \circ d_n \circ e_1 \circ \dots \circ e_m
+\el E'$.
+\item $E \subseteq E'$ is trivial with $n=1$.
+\item Be $(V,E'')$ complete and $E \subseteq E''$. This gives us $E \circ
+  E \subseteq E''$ from which we gain by induction
+$$
+    \underbrace{E \circ \dots \circ E}_{n\mathrm{-times}} =:
+    E^n \subseteq E'' \;\;\mathrm{for}\;\mathrm{all}\;n.
+$$
+Now be $c \el E'$. That implies $c = c_1 \circ \dots \circ c_n$ ($c_i
+\el E$) for a suitable $n$. Hence $c \el E^n \subseteq E''$.
+\qed
+\end{enumerate}
+
+%\paragraph*{Definition.}
+%The {\em completion} of a call graph $(V,E)$ is a call graph $(V,E')$
+%so that
+%$$
+%    c \el E' \iff \exists n>0, c_1, \dots, c_n \el E : c_1 \circ \dots \circ
+%    c_n = c
+%$$
+%\paragraph*{Proposition.}
+%The completion $(V,E')$ of a call graph $(V,E)$ is complete.
+%\paragraph*{Proof.}
+%Be $c \el E' \circ E'$. Then there are $d,e \el E'$ with $c = d \circ
+%e$. Because $(V,E')$ is complete, we have
+%\begin{eqnarray*}
+%    d = d_1 \circ \dots \circ d_n & \qquad & d_1,\dots,d_n \el E \\
+%    e = e_1 \circ \dots \circ e_m & \qquad & e_1,\dots,e_m \el E
+%\end{eqnarray*}
+%Thus $c = d_1 \circ \dots \circ d_n \circ e_1 \circ \dots \circ e_m
+%\el E'$. \qed
+
+\paragraph*{Proposition. (Completion algorithm) }
+Be $(V,E)$ a call graph, $(V,E')$ its completion and $(E_n)_{n \el
+  \N}$  a sequence of sets of calls defined as follows:
+\begin{eqnarray*}
+    E_0     & = & E \\
+    E_{n+1} & = & E_n \cup (E_n \circ E)
+\end{eqnarray*}
+Then there is a $n \el \N$ so that
+$$
+    E' = E_n = E_{n+1} = E_{n+2} = \dots
+$$
+(Obviously the $E_n$ grow monotonously.)
+\paragraph*{Proof.}
+First we show by induction that $E_n \subseteq E'$ for all $n \el
+\N$: It is obvious that $E_0 \subseteq E'$. Now be $E_n \subseteq E'$ and
+$c \el E_{n+1} \setminus E_n$. Then $c \el E_n \circ E$, therefore $c
+= d_1 \circ \dots \circ d_n \circ e$, $d_1, \dots, d_n, e \el E$. It
+follows $c \el E'$, $E_{n+1} \subseteq E'$.
+
+Second: Because we have a finit set of starting edges $E$ and
+therefore a finit set of reachable vertices and also a finit set of
+possible edges between two vertices (limited by the number of
+different call matrices of fixed dimensions) the $E_i$s cannot grow
+endlessly. Thus an $n \el \N$ exists with $E_n = E_{n+1}$.
+
+Third: We show that $E' \subseteq E_n$ for that particular $n$. Be $c
+\el E'$. Then there exists an $m$ such that $c = d_1 \circ \dots \circ
+d_m$, therefore $c \el E_m$. Now if $m \leq n$ then $E_m \subseteq
+E_n$, otherwise $m > n$ and hence $E_m = E_n$, in both cases $c \el E_n$.
+\qed
+
+\subsection{Lexical Order}
+\paragraph*{Definition.} Be $(V,E)$ a complete call graph and
+$f^{(i)}$ a function of arity $i$. We call
+$$
+    E_{f^{(i)}} := \{ \Delta(C): (f^{(i)}, f^{(i)}, C) \el E \}
+    \subset R^i
+$$
+the {\em recursion behaviour} of function $f^{(i)}$. ($\Delta$ takes the
+diagonal of square matrices).
+
+Each row of this set represents one possible recursive call of $f^{(i)}$
+and how the orders of all parameters are altered in this call. The
+diagonals of the call matrices are taken because we want to know only
+how a parameter relates to its old value in the last call to
+$f^{(i)}$. $E_{f^{(i)}}$ of course is a {\em finite} subset of $R^i$.
+
+In the following we identify lexical orders on parameters with
+permutations $\pi \el S_n$ of the arguments. Often not all of the
+parameters are relevant for termination; these are not listed in the
+lexical order and can appear in the permutation in any sequence.
+%\begin{example}Fibonacci numbers\label{ex:fib}\nopagebreak
+%\begin{verbatim}
+%fib' = [n][fn][fn']case n of
+%        { O z  => fn
+%        | S n' => fib' n' (add fn fn') fn};
+%fib = [n]fib' n (S(O())) (O());
+%\end{verbatim}
+%\foetus\ output:\nopagebreak
+%\begin{verbatim}
+%< ? ?: fib' -> fib' -> fib'
+%< ? ?: fib' -> fib'
+%fib' passes termination check by lexical order 0
+%fib passes termination check
+%\end{verbatim}
+%\runexample{add+\%3D+\%5Bx\%5D\%5By\%5Dcase+x+of+\%7B+O+z+\%3D\%3E+y+\%7C+S+x\%27+\%3D\%3E+S\%28add+x\%27+y\%29+\%7D\%3B\%0D\%0A\%0D\%0Afib\%27+\%3D+\%5Bn\%5D\%5Bfn\%5D\%5Bfn\%27\%5Dcase+n+of\%0D\%0A+\%7B+O+z+\%3D\%3E+fn\%0D\%0A+\%7C+S+n\%27+\%3D\%3E+fib\%27+n\%27+\%28add+fn+fn\%27\%29+fn\%7D\%3B\%0D\%0Afib+\%3D+\%5Bn\%5Dfib\%27+n+\%28S\%28O\%28\%29\%29\%29+\%28O\%28\%29\%29\%3B\%0D\%0A\%0D\%0A\%28fib+\%28S\%28S\%28S\%28S\%28S\%28O\%28\%29\%29\%29\%29\%29\%29\%29\%29\%3B+\%0D\%0A}
+%\end{example}
+
+In example \ref{ex:fib} ({\tt fib'}) only the argument 0 has to be
+considered to prove termination, the order of argument 1 and 2 are
+irrelevant and therefore both permutations
+$$
+    \pi_1 = \left(\begin{array}{ccc}0&1&2\\ 0&1&2\end{array}\right)
+$$
+and
+$$
+    \pi_2 = \left(\begin{array}{ccc}0&1&2\\ 0&2&1\end{array}\right)
+$$
+are valid continuations of the lexical order ``0''.
+\paragraph*{Note:}
+In the following we abbreviate the notation of permutations to
+$\pi_1 = [0 1 2]$ and $\pi_2 = [0 2 1]$.
+
+\paragraph*{Definition. (1)}
+Be $B$ the recursion behaviour of function $f^{(n)}$.
+We call the permutation $\pi \el S_n$ a {\em termination order} for
+$f^{(n)}$ if
+%$$
+%    \mathrm{for all} r \el E_{f^{(n)}} \mathrm{exists} 1 \leq k \leq n
+%    : r_{\pi(k)} = \less \mathrm{and} r_{\pi(i)} = \equal \mathrm{for
+%      all} 1 \leq i \leq k
+%$$
+$$
+    \forall r \el B \exists 1 \leq k \leq n
+    : r_{\pi(k)} = \quotless \land (\forall 1 \leq i \leq k :
+    r_{\pi(i)} = \quotequal)
+$$
+
+This definition is a very wide one. In most cases you will look for
+more special termination orders:
+
+\paragraph*{Definition. (2, inductive)}
+Be $B$ the recursion behaviour of a given function.
+We call the permutation $\pi \el S_n$ a {\em termination order} on $B$
+if $|B| = 0$ or
+\begin{eqnarray}
+    && \exists r \el B : r_{\pi(0)} = \less \nonumber\\
+    && \land \not\exists r \el B : r_{\pi(0)} = \unknown
+    \nonumber\\
+    &&  \land \,\pi'_{0} \el S_{n-1} \;\mathrm{termination}\;\mathrm{order}
+    \;\mathrm{on}\; B' := \{r'_{\pi(0)} : r_{\pi(0)} \not= \less\} \subset
+    R^{n-1} \nonumber
+\end{eqnarray}
+whereas $\pi'_i = [k_0 \dots k_{i-1} k_{i+1} \dots k_{n-1}] \el S_{n-1}$ given
+$\pi = [k_0 \dots k_{n-1}] \el S_n$ and $r'_i = (k_0, \dots, k_{i-1},
+k_{i+1}, \dots, k_{n-1}) \el R^{n-1}$ given $r = (k_0, \dots, k_{n-1})
+\el R^n$.
+
+%\paragraph*{Proposition.}
+%Be $E_{f^{(n)}}$ the recursion behaviour of function $f^{(n)}$. If any
+%termination order for $f^{(n)}$ exists, then there exists a
+%termination order $\pi$ of the form:
+%$$
+%    \exists k \forall i \leq k \exists j_i \not= j_i' (i'<i) :
+
+The algorithm implemented in \foetus\ searches termination orders
+like in definition (2); it is a one-to-one transfer of this
+definition. Every termination order matching definition (2) also
+matches definition (1) and it can easily be shown that if there is a
+termination order of type (1) there also exists on of type (2).
+\begin{example}
+Be $E = \{(\equal, \less, \unknown), (\equal, \equal, \less), (\equal,
+\less, \equal)\}$ the given recursion behaviour. Then $\pi_1 = [0 1
+2]$ is a type (1) termination order on $E$ and $\pi_2 = [1 2 0]$ is of
+both types.
+\end{example}
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "foetus"
+%%% End:

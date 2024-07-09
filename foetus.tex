@@ -1,0 +1,289 @@
+\nonstopmode
+\documentclass[12pt,a4paper]{article}
+\usepackage{myprooftree}
+\usepackage{html}
+%\usepackage{times}
+
+\newcommand{\foetus}{{\sf foetus}}
+% URLs
+\newcommand{\lmu}{http://www.uni-muenchen.de/index-e.html}
+\newcommand{\inforoot}{http://www.informatik.uni-muenchen.de}
+\newcommand{\informatik}{\inforoot/index-e.html}
+\newcommand{\tcsroot}{http://www.tcs.informatik.uni-muenchen.de}
+\newcommand{\tcs}{\tcsroot/index-e.html}
+\newcommand{\homepage}{\inforoot/~abel/}
+\newcommand{\cgi}{\tcsroot/cgi-bin/foetus-cgi}
+\newcommand{\myemail}{abel@informatik.uni-muenchen.de}
+\newcommand{\foetusftp}{\homepage ftp/foetus/}
+\newcommand{\foetustgz}{foetus.tar.gz}
+
+\newcommand{\htmllink}[2]{\html{\htmladdnormallink{#1}{#2}}}
+\newcommand{\linktocgi}[1]{\htmllink{#1}{\cgi}}
+\newcommand{\runcgi}[2]{\htmllink{#1}{\cgi ?DEFS=#2}}
+\newcommand{\runexample}[1]{\runcgi{Run example.}{#1}}
+
+\newcommand{\srcfile}[1]{\htmladdnormallink{{\tt #1}}{\foetusftp#1}}
+\newcommand{\download}{\htmllink{Download ML source
+    \foetustgz!}{\foetusftp \foetustgz}}
+
+%%begin{latexonly}
+%\input{prooftree}
+%\newcommand{\ru}[2]{\begin{prooftree}#1\justifies#2\end{prooftree}}
+%\newcommand{\rux}[3]{\begin{prooftree}#1\justifies#2\using{\rm{#3}}\end{prooftree}}
+%%end{latexonly}
+
+%\imagesonly
+%\newcommand{\depp}{}
+%\input{prooftree}
+%\newcommand{\ru}[2]{\begin{prooftree}#1\justifies#2\end{prooftree}}
+%\newcommand{\rux}[3]{\begin{prooftree}#1\justifies#2\using{\rm{#3}}\end{prooftree}}
+%\endimagesonly
+
+\newcommand{\Pitype}[1]{\{#1\}}
+%\newcommand{\Pitype}[1]{\{#1:\mathrm{Set}\}}
+\newcommand{\Let}[2]{\mathrm{Let}\ #1\ \mathrm{in}\ #2}
+\newcommand{\xlet}[2]{\mathrm{let}\ #1\ \mathrm{in}\ #2}
+\newcommand{\case}[2]{\mathrm{case}\ #1\ \mathrm{of}\ \{ #2 \}}
+\newcommand{\darr}{\Rightarrow}
+\newcommand{\G}{\Gamma}
+\newcommand{\nat}{\mathrm{nat}}
+\newcommand{\alist}{\mathrm{list}}
+\newcommand{\bool}{\mathrm{bool}}
+\newcommand{\ord}{\mathrm{ord}}
+
+\newtheorem{example}{Example}[section]
+%\newcounter{example}{section}
+%\newenvironment{example}{%
+%\addtocounter{example}{1}Example
+
+%begin{latexonly}
+\usepackage{amsbsy}
+\usepackage{amsfonts}
+\newcommand{\N}{\mathbb{N}} %{\mathbf N}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\less}{\boldsymbol{<}}%{\boldsymbol{<}}
+\newcommand{\equal}{\boldsymbol{=}}
+\newcommand{\unknown}{\boldsymbol{?}}
+\newcommand{\quotrel}[1]{\mathrm{`}\!#1\!\mathrm{'}}
+\newcommand{\ttverb}[1]{{\tt #1}}
+\newcommand{\tttilde}{$\mathtt{\sim}$}
+\newcommand{\infixless}{\less}
+\newcommand{\infixequal}{\equal}
+\newcommand{\infixunknown}{\,\unknown\,}
+%end{latexonly}
+
+\begin{htmlonly}
+\newcommand{\N}{\mathbf{N}}
+\newcommand{\Z}{\mathbf{Z}}
+\newcommand{\less}{`\!<\!'} %{\mbox{\bf <}}
+\newcommand{\equal}{`\!=\!'} %{\mbox{\bf =}}
+\newcommand{\unknown}{`?'}%{\mbox{\bf ?}}
+\newcommand{\quotrel}[1]{#1} % already quoted
+\newcommand{\ttverb}[1]{{\tt #1}}
+\newcommand{\tttilde}{\verb!~!}
+\newcommand{\infixless}{\,\less\,}
+\newcommand{\infixequal}{\,\equal\,}
+\newcommand{\infixunknown}{\,\unknown\,}
+\end{htmlonly}
+
+\newcommand{\quotless}{\quotrel{\less}}
+\newcommand{\quotequal}{\quotrel{\equal}}
+\newcommand{\quotunknown}{\quotrel{\unknown}}
+
+% already defined, abel 2002-1217
+% \newcommand{\tttilde}{\verb!~!}
+
+\newcommand{\el}{\,\epsilon\,}
+\newcommand{\notel}{\,\not\epsilon\,}
+\newcommand{\CM}{\mathbf CM}
+\newcommand{\finitsubset}{\subset_{\mathrm{finit}}}
+%\newcommand{\Iff}{\Longleftrightarrow}
+\newcommand{\qed}{\hfill $q \cdot e \cdot d$}
+
+%\usepackage{german}
+%\documentstyle[german,12pt]{article}
+\pagestyle{headings}
+
+\title{\foetus\ - Termination Checker for Simple Functional Programs}
+\author{\htmladdnormallink{Andreas Abel}{\homepage}\thanks{
+\htmladdnormallink{Theoretical Computer Science}{\tcs},
+\htmladdnormallink{Institute of Computer Science}{\informatik},
+\htmladdnormallink{Ludwigs-Maxi\-mi\-lians-University}{\lmu},
+Oettingenstr.~67, D-80538~Munich, Germany,
+email: \htmladdnormallink{{\tt \myemail}}{mailto:\myemail}.
+I want to thank my supervisor \htmladdnormallink{Thorsten
+  Altenkirch}{\tcsroot/~alti/} and \htmladdnormallink{Rolf
+  Backofen}{\tcsroot/~backofen/} for his friendly support in technical
+questions.
+}}
+\date{July 16, 1998}
+
+\begin{document}
+\maketitle
+
+%\tableofcontents
+
+\begin{abstract}
+We introduce a simple functional language \foetus\ (lambda calculus with
+tuples, constructors and pattern matching) supplied with a termination
+checker.
+This checker tries to find a well-founded structural order on the
+parameters on the given function to prove termination.
+The components of the check algorithm are: function call extraction
+out of the program text, call graph completion and finding a lexical
+order for the function parameters.
+The HTML version of this paper contains many ready-to-run
+Web-based examples.
+\end{abstract}
+
+\linktocgi{Run foetus!}
+
+\download
+
+\section{Introduction}
+Since the very beginning of informatics the problem of termination has
+been of special interest, for it is part of the problem of program
+verification for instance. Because the halting problem is
+undecidable, there is no method that can prove or disprove termination
+of all programs, but for several systems termination checkers have been
+developed. We have focused on functional programs and designed the
+simple language \foetus\footnote{In German \foetus\ is an abbreviation
+  of ``Funktionale -- Obgleich Eingeschr\"ankt -- Termination
+  Untersuchende Sprache'' {\bf ;-)}. It also expresses that it is
+  derived from MuTTI (this is the German term for {\it Mum}).},
+for which we have implemented a termination
+prover. \foetus\ is a simplification of MuTTI (Munich Type Theory
+Implementation) based on %the lambda calculus
+partial Type Theory (ala Martin L\"of) extended by tuples,
+constructors and pattern matching. For the syntax see section
+\ref{sec:syntax}.
+
+To prove the termination of a functional program there has to be a
+well founded order on the product of the function parameters
+such that the arguments in each recursive call
+are smaller than the corresponding input regarding this order.
+We have limited to {\em structural} orderings.
+\foetus\ tries to find such
+an order by collecting all recursive calls of the given function and
+the belonging behaviour of the function arguments. To handle mutually
+recursive functions a call graph is constructed and completed.
+
+Section \ref{sec:language} introduces the \foetus\ ``body'' (syntax and type
+system). Section \ref{sec:examples} provides some examples to
+intuitively learn the language and see the interpreter and termination
+checker work. Then in section \ref{sec:outline} we explain the
+``heart'' of \foetus: the call extractor; we also informally introduce
+call graph completion and finding of the lexical order: the ``brain'' of
+\foetus. The latter is formally described in section \ref{sec:formal}.
+
+
+\section{\foetus\ Language\label{sec:language}}
+\input{language}
+
+\section{Examples\label{sec:examples}}
+\input{examples}
+
+\section{Termination Checker Overall Outline\label{sec:outline}}
+\input{analyse}
+
+\section{Formal Description\label{sec:formal}}
+\input{formal}
+
+\section{Implementation\label{sec:implementation}}
+\foetus\ has been implemented in
+\htmladdnormallink{SML
+  97}{http://cm.bell-labs.com/cm/cs/what/smlnj/sml97.html}. We have used the
+new \htmladdnormallink{Standard ML Basis
+  Library}{http://www.dina.kvl.dk/\%7Esestoft/sml/sml-std-basis.html}
+to ensure a safe and possibly optimized handling of standard data
+structures like lists etc. The parser for the \foetus\ terms has been
+created with ML-Lex and ML-Yacc.
+The ML implementation currently used is
+\htmladdnormallink{Standard ML of New Jersey}%
+{http://cm.bell-labs.com/cm/cs/what/smlnj/index.html}, Version 109.32.
+
+\begin{table}[htbp]
+  \begin{center}
+\begin{tabular}{ll}
+\srcfile{foetus.lex}   & \foetus\ language token specification for {\tt
+  ml-lex} \\
+\srcfile{foetus.grm}   & \foetus\ language grammar for {\tt ml-yacc} \\
+\srcfile{aux.sml}      & auxiliary functions \\
+\srcfile{closure.sml}  & terms and environment \\
+{\bf \srcfile{foetus.sml}}  & values, evaluation function {\tt hnf},
+  printing \\
+\srcfile{matrix.sml}        & polymorphic matrices with necessary operations\\
+\srcfile{simpledeps.sml}    & simple implementation of dependecies \\
+{\bf \srcfile{analyse.sml}} & static analysis of \foetus\ code \\
+{\bf \srcfile{check.sml}}   & termination check via call graph \\
+\srcfile{top.sml}      & top level environment \\
+\srcfile{load.sml}     & loader and \foetus\ parser
+\end{tabular}
+    \caption{\foetus\ source files}
+    \label{tab:src}
+  \end{center}
+\end{table}
+
+\download
+
+\section{Conclusion\label{sec:conclusion}}
+We have seen that \foetus\ and its ``brain'', the call graph
+completion and finding a lexical order on the function arguments,
+contributes to automated termination proofs. Of course, in its current
+state it is no more than a toy to gather experience on his
+subject. Some improvements have to be done: \foetus\ should be able to
+recognize more kinds of dependencies (see section \ref{sec:funex}).
+\begin{itemize}
+\item Let assignments. The use of {\tt let}-constructs to save
+  values within functions is discouraged because \foetus\ stores no
+  relations concerning them; it performs no symbolic evaluation during
+  analyzation. For example:
+\begin{verbatim}
+case list of
+        {Cons pair => let
+                hd = pair.HD,
+                tl = pair.TL in ...
+\end{verbatim}
+\foetus\ does not know that {\tt hd} $\less$ {\tt list} and that {\tt
+  tl}  $\less$ {\tt list}. At least such simple assignments (for code
+shortening) should be handled.
+\item Tuple handling. \foetus\ should trace the dependencies not only
+  of the whole tuples but also of their components. At the moment you
+  cannot define functions with one tuple as parameter instead of
+  separate parameters and still expect a termination proof (see
+  example \ref{ex:tupelparm}).
+\item Function results. The reason that \foetus\ cannot prove
+  termination of {\tt div} (see example \ref{ex:div}) is that it does
+  not know $x \not=0 \rightarrow (y-x=0 \lor y-x<y)$. But this could
+  be shown for the {\tt sub} function by induction and result in a
+  dependency \foetus\ could use \cite{BG96}.
+\end{itemize}
+Furthermore the call graph completion algorithm could be adopted to
+prove termination of parameter permuting functions like {\tt zip} (see
+example \ref{ex:parmperm}).
+
+If \foetus\ has ``grown older'' in the described manner it could be
+``born into'' one of the ``adult'' program verfication systems or
+theorem provers like ALF, Isabelle, LEGO or MuTTI {\bf ;-)}.
+
+\begin{rawhtml}
+<p align=center>
+<a href="http://www.nrlc.org/abortion/wdlb/wdlb1.html">
+<img src="../thumb.gif" alt="fetus, 18 weeks old" border=1>
+</a>
+</p>
+\end{rawhtml}
+
+\nocite{Gie97}
+\nocite{Sli96}
+\nocite{Sli97a}
+\nocite{NPS90}
+\nocite{TTu97b}
+\nocite{Pau91}
+%\cite{BG96}
+
+\bibliographystyle{myplain}
+\bibliography{mybiblio}
+
+\end{document}
+
