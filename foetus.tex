@@ -6,11 +6,11 @@
 
 \newcommand{\foetus}{{\sf foetus}}
 % URLs
-\newcommand{\lmu}{http://www.uni-muenchen.de/index-e.html}
-\newcommand{\inforoot}{http://www.informatik.uni-muenchen.de}
-\newcommand{\informatik}{\inforoot/index-e.html}
-\newcommand{\tcsroot}{http://www.tcs.informatik.uni-muenchen.de}
-\newcommand{\tcs}{\tcsroot/index-e.html}
+\newcommand{\lmu}{https://www.lmu.de/en/}
+\newcommand{\inforoot}{https://www.ifi.uni-muenchen.de}
+\newcommand{\informatik}{\inforoot/index.html}
+\newcommand{\tcsroot}{https://www2.tcs.ifi.lmu.de}
+\newcommand{\tcs}{\tcsroot/index.html}
 \newcommand{\homepage}{\inforoot/~abel/}
 \newcommand{\cgi}{\tcsroot/cgi-bin/foetus-cgi}
 \newcommand{\myemail}{abel@informatik.uni-muenchen.de}
@@ -23,8 +23,9 @@
 \newcommand{\runexample}[1]{\runcgi{Run example.}{#1}}
 
 \newcommand{\srcfile}[1]{\htmladdnormallink{{\tt #1}}{\foetusftp#1}}
-\newcommand{\download}{\htmllink{Download ML source
-    \foetustgz!}{\foetusftp \foetustgz}}
+\newcommand{\download}{SML sources: \url{https:github.com/andreasabel/foetus}}
+% \newcommand{\download}{\htmllink{Download ML source
+%     \foetustgz!}{\foetusftp \foetustgz}}
 
 %%begin{latexonly}
 %\input{prooftree}
@@ -132,11 +133,13 @@ parameters on the given function to prove termination.
 The components of the check algorithm are: function call extraction
 out of the program text, call graph completion and finding a lexical
 order for the function parameters.
-The HTML version of this paper contains many ready-to-run
-Web-based examples.
+%% 2024-07-09: online version is broken.
+% The HTML version of this paper contains many ready-to-run
+% Web-based examples.
 \end{abstract}
 
-\linktocgi{Run foetus!}
+% 2024-07-09: online version (CGI) is broken.
+% \linktocgi{Run foetus!}
 
 \download
 
@@ -286,4 +289,3 @@ theorem provers like ALF, Isabelle, LEGO or MuTTI {\bf ;-)}.
 \bibliography{mybiblio}
 
 \end{document}
-
