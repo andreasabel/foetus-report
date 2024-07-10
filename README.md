@@ -5,6 +5,8 @@ student project carried out in 1997/98 under the supervision of Thorsten Altenki
 
 [Rendered.](https://andreasabel.github.io/foetus-report/)
 
+arXiv: http://arxiv.org/abs/2407.06924
+
 LaTeX sources:
 
 - [Main](foetus.tex)
